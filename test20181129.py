@@ -13,17 +13,16 @@ from dwave.system.composites import EmbeddingComposite
 #->1:return 2:risk aversion 3:constrain
 
 #setting parameters
-T = 6
-N = 10
-B = 150
+T = 20
+N = 8
+B = 50
 theta1 = 0.3
 theta2 = 0.3
-theta3 = 3.0
-
+theta3 = 3
 np.random.seed(5)
 
 #make random prices
-P = np.random.randint(1,100,(T,N))
+P = np.random.randint(25,75,(T,N))
 
 #calculate return rate
 R = np.zeros((T-1,N))
@@ -35,6 +34,7 @@ for j in range(N):
 #axis = 0:calculate over column,bias = 1:normalization by N
 Ravg = np.average(R, axis=0)
 Rcov = np.cov(R, rowvar=0, bias=1)
+Rvar = np.var(R, axis=0)
 
 #make QUBO
 Qmirror = np.empty((N,N))
@@ -50,7 +50,7 @@ for i in range(N):
 
 #sampling with D-wave machine           
 sampler = EmbeddingComposite(DWaveSampler())
-response = sampler.sample_qubo(Q, num_reads=100)
+response = sampler.sample_qubo(Q, num_reads=1000)
 for sample in response.samples():
     print(sample)
 
@@ -59,6 +59,7 @@ sum = 0
 for i in range(N):
     if response.record['sample'][0,i] == 1:
         sum += P[-1,i]
+        print(i)
 
 print(response.record['sample'][0])        
 print(sum)
